@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comparativo de Tambores</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      margin: 40px;
+    }
+    h1 {
+      text-align: center;
+      font-weight: 500;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #f0f0f0;
+    }
+    input {
+      width: 80px;
+      padding: 5px;
+      text-align: center;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #0066cc;
+    }
+    .condiciones {
+      margin-top: 30px;
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ddd;
+    }
+    .condiciones h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .condiciones ul {
+      list-style: none;
+      padding: 0;
+    }
+    .condiciones li {
+      margin-bottom: 5px;
+    }
+    .pago {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>Comparativo de Tambores de Lubricante 15W40</h1>
+
+  <label for="pedido">Pedido (N° de unidades): </label>
+  <input type="number" id="pedido" value="1" min="1" onchange="calcular()">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Tipo de tambor</th>
+        <th>Precio Unitario sin IVA</th>
+        <th>IVA 16%</th>
+        <th>Precio Unitario con IVA</th>
+        <th>Subtotal</th>
+        <th>Descuento (%)</th>
+        <th>Descuento (Monto)</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-body">
+      <!-- Se llenará dinámicamente -->
+    </tbody>
+  </table>
+
+  <div class="condiciones">
+    <h2>Condiciones Comerciales</h2>
+    <ul>
+      <li>En compras mayores a $100,000 pesos: descuento del 20%</li>
+      <li>En compras mayores a $250,000 pesos: descuento del 30%</li>
+      <li>En compras mayores a $500,000 pesos: descuento del 40%</li>
+      <li>Pago: 50% contra orden de compra y 50% contra aviso de embarque</li>
+      <li>Precios sujetos a cambio sin previo aviso</li>
+    </ul>
+    <div id="pago-info" class="pago"></div>
+  </div>
+
+  <script>
+    const productos = [
+      { nombre: "Lubricante 15W40", tipo: "Segunda mano", precioSinIVA: 14500 },
+      { nombre: "Lubricante 15W40", tipo: "Nuevo", precioSinIVA: 15000 }
+    ];
+
+    function calcular() {
+      const pedido = parseInt(document.getElementById("pedido").value) || 0;
+      const tbody = document.getElementById("tabla-body");
+      tbody.innerHTML = "";
+
+      let resumenPagos = "";
+
+      productos.forEach(p => {
+        const ivaUnitario = p.precioSinIVA * 0.16;
+        const precioConIVA = p.precioSinIVA + ivaUnitario;
+        const subtotal = precioConIVA * pedido;
+        const descuento = calcularDescuento(subtotal);
+        const porcentaje = subtotal > 0 ? (descuento / subtotal) * 100 : 0;
+        const total = subtotal - descuento;
+
+        const row = `
+          <tr>
+            <td>${p.nombre}</td>
+            <td>${p.tipo}</td>
+            <td>$${p.precioSinIVA.toLocaleString()}</td>
+            <td>$${ivaUnitario.toLocaleString()}</td>
+            <td>$${precioConIVA.toLocaleString()}</td>
+            <td>$${subtotal.toLocaleString()}</td>
+            <td>${porcentaje.toFixed(0)}%</td>
+            <td>$${descuento.toLocaleString()}</td>
+            <td class="highlight">$${total.toLocaleString()}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+
+        // Resumen por tipo de tambor basado en la última columna (Total)
+        resumenPagos += `
+          <p><strong>${p.tipo}:</strong><br>
+          Monto total con descuento: $${total.toLocaleString()}<br>
+          Pago 50% contra orden de compra: $${(total * 0.5).toLocaleString()}<br>
+          Pago 50% contra aviso de embarque: $${(total * 0.5).toLocaleString()}</p>
+        `;
+      });
+
+      // Mostrar resumen por separado
+      const pagoInfo = document.getElementById("pago-info");
+      pagoInfo.innerHTML = resumenPagos;
+    }
+
+    function calcularDescuento(subtotal) {
+      if (subtotal > 500000) return subtotal * 0.40;
+      if (subtotal > 250000) return subtotal * 0.30;
+      if (subtotal > 100000) return subtotal * 0.20;
+      return 0;
+    }
+
+    // Inicializar tabla
+    calcular();
+  </script>
+</body>
+</html>
